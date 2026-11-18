@@ -34,7 +34,8 @@ GENERIC = {"action", "fund", "foundation", "network", "project", "alliance", "ca
            "center", "centre", "institute", "group", "coalition", "partners", "media", "digital", "strategies",
            "global", "national", "international", "america", "american", "united", "states", "new", "york",
            "self employed", "self-employed", "freelance", "freelancer", "independent", "consultant", "retired",
-           "stealth", "confidential", "various", "none", "na", "n a"}
+           "stealth", "confidential", "various", "none", "na", "n a", "new york", "london", "washington",
+           "washington dc", "chicago", "california", "usa", "uk", "us"}
 
 
 def norm(name):
@@ -54,9 +55,9 @@ def keys_for(name):
     if k:
         out.add(k)
     for m in re.findall(r"\(([^)]+)\)", name or ""):
-        a = norm(m)
-        if len(a) >= 3:
-            out.add(a)
+        # Only real acronyms like "(NRDC)", not places like "(New York)".
+        if re.fullmatch(r"[A-Z0-9&.\-]{2,10}", m.strip()):
+            out.add(norm(m))
     head = re.split(r"\s[-–:|]\s|:", name or "")[0]
     if head and head != name:
         h = norm(head)
