@@ -11,6 +11,7 @@ Job Scout gives one person a daily, ranked list of jobs that fit them. It has fo
 2. **A Google Sheet tracker**: one tab, "Jobs", mirroring the database, so they can sort, filter and edit in a familiar place. Edits in the sheet flow back to the database each day.
 3. **A daily run**: a scheduled task that reads job emails, checks live job boards and watched organisations, scores new jobs, closes expired ones and updates both the database and the sheet.
 4. **An optional LinkedIn browser scan** on the person's own computer (Claude in Chrome), which adds rows to the sheet for the daily run to import.
+5. **Optional contacts matching**: upload a LinkedIn data export and Job Scout flags every job at an organisation where the person knows someone.
 
 Read the reference file for the mode you are in:
 
@@ -21,6 +22,7 @@ Read the reference file for the mode you are in:
 | Understand or change scoring | `references/scoring.md` |
 | Add job sources, email lists, organisations | `references/sources.md` |
 | Set up the LinkedIn scan on their computer | `references/linkedin-browser-scan.md` |
+| Upload LinkedIn connections / find jobs where they know someone | `references/linkedin-contacts.md` |
 
 ## Ground rules (always apply)
 
@@ -44,8 +46,9 @@ These protect the user. Follow them in every mode, and copy them into any schedu
 | `config` | `sheetId`, `sheetTab`, `sheetUrl`, `sheetColumns`, `lastSheetSyncAt`, `schedule`, `email`, `filters`, `liveBoards`, `bluesky`, `watch[]`, `orgWatch[]`, rules (see `templates/config.example.json`) |
 | `ingest` | `lastRunAt`, `lastSummary`, `processedMessageIds` (last 800) |
 | `health` | dashboard status panel (see `references/daily-run.md` step 11) |
+| `network` | optional: their LinkedIn connections grouped by employer (no emails), see `references/linkedin-contacts.md` |
 
-Jobs live in `data/users/me/jobs/items`, one document per job: `url, title, org, location, salary, posted, closing, fit, why, gaps, status, foundAt, notes, verified (open|unknown|closed), checkedAt, source, movedAt, notesAt`. Run history lives in `data/users/me/runs/items`, one document per day (id `YYYY-MM-DD`).
+Jobs live in `data/users/me/jobs/items`, one document per job: `url, title, org, location, salary, posted, closing, fit, why, gaps, status, foundAt, notes, verified (open|unknown|closed), checkedAt, source, movedAt, notesAt`, plus optional `contactsCount, contacts [{name, position, url}], contactsOrg`. Run history lives in `data/users/me/runs/items`, one document per day (id `YYYY-MM-DD`).
 
 A job's document id is `scripts/job_id.py <url> <title>` (the same hash the dashboard uses), so the same posting never gets added twice.
 

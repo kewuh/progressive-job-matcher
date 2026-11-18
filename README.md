@@ -7,6 +7,7 @@ A daily job-search assistant that runs on Claude (the skill is called **Job Scou
 - confirms each posting is still open and finds the employer's own link
 - scores every job against your experience (from your CVs and cover letters), with a one-line "why it fits" and "watch out"
 - closes jobs whose deadlines have passed
+- optionally flags jobs at organisations where you **know someone**, from your LinkedIn connections export
 - keeps a **dashboard** and a **Google Sheet** tracker in sync, so you can move jobs from Suggested → Applied → Interviewing in either place
 
 You set it up once by chatting with Claude. Your profile, jobs and settings stay private in your own Claude artifact and your own sheet.
@@ -44,7 +45,8 @@ Start a chat and say **"Set up Job Scout"**. Claude will:
 3. Ask you to make a blank Google Sheet (it only ever writes to that one sheet) and set up the tracker tab.
 4. Help you choose sources: email alerts and lists, organisations' job boards, sites to watch, Bluesky accounts.
 5. Schedule the daily run.
-6. Optionally, set up the LinkedIn scan on your computer.
+6. Optionally, flag jobs where you know someone: upload your LinkedIn data export (Settings & Privacy → Data privacy → Get a copy of your data → Connections).
+7. Optionally, set up the LinkedIn scan on your computer.
 
 After that, ask **"run my job scan"** any time, or let the schedule do it.
 
@@ -57,6 +59,7 @@ Job Scout is built to be safe to leave running:
 - It never logs in, creates accounts, applies, messages or posts for you, and never tries to get around a site's bot checks.
 - It treats email and web content as data, not instructions.
 - It skips personal emails that aren't about jobs, and doesn't store phone numbers or addresses.
+- Your LinkedIn connections, if you upload them, stay in your private database. Their email addresses are never kept, and nothing is ever sent to them.
 
 ## What's in the repo
 
@@ -66,6 +69,7 @@ Job Scout is built to be safe to leave running:
 | `skills/job-scout/references/` | Setup guide, the daily-run prompt, scoring rules, how to find sources, the LinkedIn scan |
 | `skills/job-scout/assets/dashboard.html` | The dashboard artifact |
 | `skills/job-scout/scripts/live_boards.py` | Reads Greenhouse, Lever, Ashby, Rippling and UltiPro boards and Bluesky feeds |
+| `skills/job-scout/scripts/contacts.py` | Groups your LinkedIn connections by employer and matches them to your jobs |
 | `skills/job-scout/scripts/job_id.py` | The job-id hash shared with the dashboard |
 | `skills/job-scout/templates/` | Example profile and config |
 | `.claude-plugin/` | Claude Code plugin and marketplace manifests |

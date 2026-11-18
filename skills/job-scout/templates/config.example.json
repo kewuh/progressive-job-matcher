@@ -2,7 +2,7 @@
   "sheetId": "<Google Sheet ID from its URL, between /d/ and /edit>",
   "sheetTab": "Jobs",
   "sheetUrl": "https://docs.google.com/spreadsheets/d/<SHEET ID>/edit",
-  "sheetColumns": ["Status","Fit","Title","Organisation","Location","Salary","Posted","Closes (deadline)","Still open?","Source","Found","Why it fits","Notes","Link","ID"],
+  "sheetColumns": ["Status","Fit","Title","Organisation","Location","Salary","Posted","Closes (deadline)","Still open?","Source","Found","Why it fits","Notes","Link","ID","Contacts"],
   "schedule": {"time": "07:40", "timezone": "America/New_York"},
   "email": {
     "jobListSenders": ["jobalerts-noreply@linkedin.com", "jobs@arena.run"],

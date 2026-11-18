@@ -71,6 +71,9 @@ details.profile textarea{width:100%;border:1px solid var(--line);background:var(
 .tag.open{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
 .tag.unk{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
 .tag.shut{background:var(--chip);color:var(--low)}
+.tag.know{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.know-line{font-size:13px;margin:4px 0 0;color:var(--ink)}
+.know-line a{color:var(--accent)}
 .meta .src{font:12px var(--mono);color:var(--accent)}
 .ingest{font:12px/1.4 var(--mono);color:var(--muted);margin:-8px 0 0}
 .newbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--mark);border-radius:8px;background:var(--bg);font-size:14px}
@@ -133,6 +136,8 @@ details.profile textarea{width:100%;border:1px solid var(--line);background:var(
     <select id="sortBy"><option value="fit">Best fit</option><option value="posted">Newest posted</option><option value="new">Newest found</option></select>
     <label for="srcFilter">Source</label>
     <select id="srcFilter"><option value="all">All sources</option></select>
+    <label for="knowFilter">Contacts</label>
+    <select id="knowFilter"><option value="all">Any</option><option value="yes">Where I know someone</option></select>
   </div>
 
   <section class="list" id="list" aria-live="polite">
@@ -210,6 +215,7 @@ function jobCard(j){
   a.href = j.url; a.target = "_blank"; a.rel = "noopener"; h.append(a);
   if (j.status === "suggested" && isNew(j)) { h.append(" "); h.append(el("span","tag new","new")); }
   const vb = verifyBadge(j); if (vb){ h.append(" "); h.append(vb); }
+  if (j.contactsCount){ h.append(" "); h.append(el("span","tag know", "You know " + j.contactsCount + (j.contactsCount === 1 ? " person" : " people") + " here")); }
   card.append(h);
 
   const meta = el("div","meta");
@@ -221,6 +227,16 @@ function jobCard(j){
   const body = el("div"); body.style.minWidth = "0";
   if (j.why) body.append(el("p","why", j.why));
   if (j.gaps) body.append(el("p","gaps", "Watch out: " + j.gaps));
+  if (Array.isArray(j.contacts) && j.contacts.length){
+    const k = el("p","know-line"); k.append("Your contacts" + (j.contactsOrg ? " at " + j.contactsOrg : "") + ": ");
+    j.contacts.slice(0, 5).forEach((c, i) => {
+      if (i) k.append(", ");
+      const nm = /^https:\/\/(www\.)?linkedin\.com\//.test(c?.url || "") ? Object.assign(el("a", null, c.name || "?"), { href: c.url, target: "_blank", rel: "noopener" }) : el("span", null, c?.name || "?");
+      k.append(nm); if (c?.position) k.append(" (" + c.position + ")");
+    });
+    if (j.contactsCount > j.contacts.length) k.append(" and " + (j.contactsCount - j.contacts.length) + " more");
+    body.append(k);
+  }
   card.append(body); body.style.gridColumn = "2";
 
   if (j.pitch) card.append(el("div","pitch", j.pitch));
@@ -274,7 +290,7 @@ function render(){
   }
   const src = srcSel.value;
   const rows = [...state.jobs.values()]
-    .filter(j => j.status === state.stage && locMatch(j, loc) && (Number(j.fit) || 0) >= minFit && (src === "all" || srcOf(j) === src))
+    .filter(j => j.status === state.stage && locMatch(j, loc) && (Number(j.fit) || 0) >= minFit && (src === "all" || srcOf(j) === src) && ($("knowFilter").value !== "yes" || (j.contactsCount || 0) > 0))
     .sort((a,b) => sort === "fit" ? (b.fit||0) - (a.fit||0) : sort === "posted" ? String(b.posted||"").localeCompare(String(a.posted||"")) || (b.foundAt||0) - (a.foundAt||0) : (b.foundAt||0) - (a.foundAt||0));
   if (!rows.length){
     const msg = state.stage === "suggested"
@@ -289,6 +305,7 @@ function srcOf(j){
   try { return new URL(j.url).hostname.replace(/^www\./, ""); } catch { return "web"; }
 }
 $("srcFilter").addEventListener("change", render);
+$("knowFilter").addEventListener("change", render);
 ["locFilter","minFit","sortBy"].forEach(id => $(id).addEventListener("change", e => { safeSet({locFilter:"loc3",minFit:"minFit",sortBy:"sort"}[id], e.target.value); render(); }));
 
 async function saveJob(id, patch){

@@ -17,7 +17,7 @@ Don't rely on files from earlier days; the container may be fresh. All state liv
 
 **1. Read state.** Read `profile`, `config`, `ingest`, `health`, and all jobs (`list`, limit 1000, `out_dir` set to a scratch folder; note each doc's version from the list output, since the saved files don't include it).
 
-**2. Sheet → database.** Read `Jobs!A1:O2000` (large results may be saved to a file; parse that). Find columns from the header row. Rows can move, so match by the ID column and check the title matches before changing anything.
+**2. Sheet → database.** Read `Jobs!A1:P2000` (large results may be saved to a file; parse that). Find columns from the header row. Rows can move, so match by the ID column and check the title matches before changing anything.
 - Status differs (compare lowercased): the sheet wins unless the job's `movedAt` is later than `config.lastSheetSyncAt`. When the sheet wins, set `status` and `movedAt`.
 - Notes: same rule, using `notesAt`.
 - Fit changed by the user: take the sheet's value.
@@ -44,6 +44,8 @@ Don't rely on files from earlier days; the container may be fresh. All state liv
 
 **5. Filter and score.** Follow `references/scoring.md`. De-duplicate against existing jobs by URL or by normalised org + title.
 
+**5b. Contacts.** If `data/users/me/network` exists, match every new job (and any active job without contact fields) against it as described in `references/linkedin-contacts.md`, and set `contactsCount`, `contacts` and `contactsOrg`. Mention jobs where they know someone first in the summary.
+
 **6. Dates.** Record `posted` (YYYY-MM-DD; convert "3 days ago" using today's date) and `closing` (YYYY-MM-DD, or "Rolling" / "Open until filled", empty only if the posting says nothing).
 
 **7. Verify.** Follow each new job through to the employer's own posting and store that URL. `verified: "open"` only if the page shows this posting with an apply option or a future deadline (being on a live board counts). Drop jobs that are clearly closed. Otherwise "unknown".
@@ -56,7 +58,7 @@ Don't rely on files from earlier days; the container may be fresh. All state liv
 
 **9. Write the database** with ArtifactData `batch` (≤ 50 writes per batch; `if_version` on existing docs). New jobs: status "suggested", `foundAt` now, `checkedAt` now, `source`.
 
-**10. Database → sheet.** Append a row for each job whose ID isn't in the sheet, below the last used row, in header order. Status capitalised; "Still open?" is "Yes (checked)", "Not confirmed" or "Closed"; dates YYYY-MM-DD. For existing rows, update only cells that changed today (find by ID, check title, pass `null` to skip cells). Read back a few rows to verify. If Sheets errors or asks for sign-in, skip this step and add "Google Sheets connector needs reconnecting in Settings → Connectors" to health problems.
+**10. Database → sheet.** Append a row for each job whose ID isn't in the sheet, below the last used row, in header order. Fill the Contacts column (P) for jobs with contacts, e.g. "Alex Example (Digital Strategist); +2 more". Status capitalised; "Still open?" is "Yes (checked)", "Not confirmed" or "Closed"; dates YYYY-MM-DD. For existing rows, update only cells that changed today (find by ID, check title, pass `null` to skip cells). Read back a few rows to verify. If Sheets errors or asks for sign-in, skip this step and add "Google Sheets connector needs reconnecting in Settings → Connectors" to health problems.
 
 **11. Finish.**
 - `config` (update): `lastSheetSyncAt` (only if the sheet sync ran), `lastCheckedAt` on each watch/org entry actually checked, any URL fixes, new sources.
@@ -65,7 +67,7 @@ Don't rely on files from earlier days; the container may be fresh. All state liv
 - `runs/items/<YYYY-MM-DD>` (set): `{status, summary, finishedAt, counts}`.
 
 **12. Summary for the user**, short:
-- new jobs (title – org – fit – posted – deadline – source), grouped by the person's location filters
+- new jobs (title – org – fit – posted – deadline – source), grouped by the person's location filters; flag any where they know someone
 - deadlines in the next 7 days
 - jobs that closed
 - sheet changes picked up (including LinkedIn-scan rows)

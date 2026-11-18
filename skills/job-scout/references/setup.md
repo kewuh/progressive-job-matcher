@@ -38,11 +38,11 @@ Then write the profile doc and an initial config doc to `data/users/me` with Art
 
 Ask the user to create a blank Google Sheet (sheets.new), rename the first tab to `Jobs`, and paste you the link. Don't create it yourself: Job Scout only writes to a sheet the user made. Take the ID from the URL (between `/d/` and `/edit`).
 
-Write the header row to `Jobs!A1:O1`:
+Write the header row:
 
-`Status, Fit, Title, Organisation, Location, Salary, Posted, Closes (deadline), Still open?, Source, Found, Why it fits, Notes, Link, ID`
+`Status, Fit, Title, Organisation, Location, Salary, Posted, Closes (deadline), Still open?, Source, Found, Why it fits, Notes, Link, ID, Contacts`
 
-Save `sheetId`, `sheetTab` ("Jobs"), `sheetUrl` and `sheetColumns` in config. Tell them they can edit Status, Fit and Notes in the sheet, add their own rows (Title + Link, ID blank), and delete rows they don't care about; the daily run picks those changes up.
+(write it to `Jobs!A1:P1`). Save `sheetId`, `sheetTab` ("Jobs"), `sheetUrl` and `sheetColumns` in config. Tell them they can edit Status, Fit and Notes in the sheet, add their own rows (Title + Link, ID blank), and delete rows they don't care about; the daily run picks those changes up.
 
 ## 4. Choose sources
 
@@ -77,6 +77,10 @@ If the scheduled task needs connectors (Gmail, Sheets, search), make sure they'r
 
 Offer to run the daily scan now so they see results. Afterwards, walk them through the dashboard and the sheet, and ask what looks wrong: bad matches mean the profile or prefs need tightening; missing jobs mean a source is missing.
 
-## 7. Optional: LinkedIn on their computer
+## 7. Optional: contacts
+
+Offer to flag jobs where they know someone: they upload their LinkedIn data export and you follow `references/linkedin-contacts.md`. It takes about 10 minutes, mostly waiting for LinkedIn's email.
+
+## 8. Optional: LinkedIn on their computer
 
 If they use the Claude desktop app with Claude in Chrome and are signed in to LinkedIn, offer the browser scan in `references/linkedin-browser-scan.md`. It runs as a scheduled task on their own computer and adds rows to the sheet.
