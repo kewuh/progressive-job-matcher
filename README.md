@@ -45,7 +45,7 @@ Start a chat and say **"Set up Job Scout"**. Claude will:
 3. Ask you to make a blank Google Sheet (it only ever writes to that one sheet) and set up the tracker tab.
 4. Help you choose sources: email alerts and lists, organisations' job boards, sites to watch, Bluesky accounts.
 5. Schedule the daily run.
-6. Optionally, flag jobs where you know someone: upload your LinkedIn data export (Settings & Privacy → Data privacy → Get a copy of your data → Connections).
+6. Optionally, flag jobs where you know someone: upload your LinkedIn data export (Settings & Privacy → Data privacy → Download your data → Connections).
 7. Optionally, set up the LinkedIn scan on your computer.
 
 After that, ask **"run my job scan"** any time, or let the schedule do it.

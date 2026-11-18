@@ -6,9 +6,9 @@ A warm introduction is often the best way into a job. This feature reads the use
 
 Tell the user:
 
-1. On LinkedIn, go to **Me → Settings & Privacy → Data privacy → Get a copy of your data**.
-2. Choose **"Want something in particular?"**, tick **Connections**, and request the archive. (Connections alone usually arrives by email within about 10 minutes; a full archive can take a day.)
-3. Download the file from the email link. It's a `.zip` containing `Connections.csv`.
+1. On LinkedIn, go to **Me → Settings & Privacy → Data privacy → Download your data** (older versions call it "Get a copy of your data").
+2. Choose the option to pick particular files ("Want something in particular?"), tick **Connections** only, and click **Request archive**. LinkedIn may ask for their password. (Connections alone usually arrives within 10–20 minutes; a full archive can take a day.)
+3. When LinkedIn's email arrives, go back to the same page and click **Download archive**. It's a `.zip` containing `Connections.csv`.
 4. Upload the zip, or just `Connections.csv`, here.
 
 Connections only show a company if the contact lists one on their profile, and LinkedIn lets members hide their email from the export. Both are normal.
