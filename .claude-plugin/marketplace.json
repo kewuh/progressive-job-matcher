@@ -1,11 +1,13 @@
 {
-  "name": "job-scout",
-  "owner": {"name": "Job Scout"},
+  "name": "movement-match",
+  "owner": {
+    "name": "Movement Match"
+  },
   "plugins": [
     {
-      "name": "job-scout",
+      "name": "movement-match",
       "source": "./",
-      "description": "A daily job-search assistant with a dashboard and Google Sheet tracker."
+      "description": "Matches people in progressive movements to the right roles: finds jobs every day, checks they're still open, scores them against your experience, and keeps a dashboard and Google Sheet tracker in sync."
     }
   ]
 }

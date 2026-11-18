@@ -1,4 +1,4 @@
-<title>Job Scout</title>
+<title>Movement Match</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -102,7 +102,7 @@ details.profile textarea{width:100%;border:1px solid var(--line);background:var(
 
 <div class="wrap">
   <header>
-    <h1><mark>Job Scout</mark></h1>
+    <h1><mark>Movement Match</mark></h1>
     <p class="sub" id="profileLine">Finds jobs that match your profile, checks they are still open, and ranks each one against your experience.</p>
   </header>
 
@@ -146,7 +146,7 @@ details.profile textarea{width:100%;border:1px solid var(--line);background:var(
 
   <details class="profile" id="profileBox">
     <summary>Your profile &amp; search terms</summary>
-    <label for="profileText">Profile used for scoring (from your CVs)</label>
+    <label for="profileText">Profile used for scoring (from your resumes)</label>
     <textarea id="profileText" rows="9"></textarea>
     <label for="queriesText">Search queries, one per line</label>
     <textarea id="queriesText" rows="8"></textarea>
@@ -260,7 +260,7 @@ function jobCard(j){
   card.append(act);
 
   if (j.status !== "suggested"){
-    const n = el("textarea","notes"); n.id = "nt-" + j.id; n.placeholder = "Notes: deadline, contact, which CV version…"; n.value = j.notes || "";
+    const n = el("textarea","notes"); n.id = "nt-" + j.id; n.placeholder = "Notes: deadline, contact, which resume version…"; n.value = j.notes || "";
     n.onchange = () => saveJob(j.id, { notes: n.value, notesAt: Date.now() });
     card.append(n);
   }
@@ -477,7 +477,7 @@ $("searchBtn").onclick = async () => {
     if (!results.length){ setStatus(firstErr ? mcpMessage(firstErr.reason) : "No results came back. Try different search terms.", true); return; }
 
     phase = "rank";
-    setStatus(`Reading ${results.length} pages and scoring against your CV… (this takes about a minute)`);
+    setStatus(`Reading ${results.length} pages and scoring against your resume… (this takes about a minute)`);
     const known = [...state.jobs.values()].map(j => `${j.org} | ${j.title}`).slice(0, 200).join("\n");
     const prompt = `You are screening job search results for one candidate. Today is ${today}.
 
@@ -497,7 +497,7 @@ TASK: Extract every distinct, currently-open job posting that is plausibly relev
 For each job, score fit 0-100 for THIS candidate: skills and seniority overlap with the profile, mission alignment with what the profile cares about, and location (${p.locations || "any"}). Be honest; a weak match is fine to include with a low score.
 
 Reply with only a JSON array, best fit first, max 25 items:
-[{"url":"...","title":"...","org":"...","location":"e.g. Remote (US) / London (hybrid)","salary":"as stated or empty","posted":"YYYY-MM-DD or empty","closing":"YYYY-MM-DD or empty","fit":82,"why":"one sentence naming the specific CV experience that matches","gaps":"short phrase on the main gap or risk, or empty"}]`;
+[{"url":"...","title":"...","org":"...","location":"e.g. Remote (US) / London (hybrid)","salary":"as stated or empty","posted":"YYYY-MM-DD or empty","closing":"YYYY-MM-DD or empty","fit":82,"why":"one sentence naming the specific resume experience that matches","gaps":"short phrase on the main gap or risk, or empty"}]`;
     const jobs = await sample.json(prompt, { signal: ctl.signal, cache: false });
     if (!Array.isArray(jobs)) throw { code: "invalid_json" };
     const cands = jobs.filter(r => r && r.url && r.title && /^https?:\/\//.test(String(r.url))).slice(0, 20)
@@ -581,7 +581,7 @@ function renderHealth(h){
   cell(c.sourcesStale, "stale copies"); cell(c.sourcesFailed, "failed"); cell((c.orgsResolved ?? "–") + "/" + (c.orgsTotal ?? "–"), "org pages found");
   body.append(grid);
   if (state.runs && state.runs.length){
-    const lab = document.createElement("p"); lab.className = "hm"; lab.textContent = "Last " + state.runs.length + " runs (green = OK, amber = partial, red = failed, grey = missed)";
+    const lab = document.createElement("p"); lab.className = "hm"; lab.textContent = "Last " + state.runs.length + " runs (green = OK, amber = partial, red = failed, gray = missed)";
     const strip = document.createElement("div"); strip.className = "strip";
     for (const r of state.runs){ const i = document.createElement("i"); i.className = r.status === "ok" ? "ok" : r.status === "partial" ? "warn" : r.status === "failed" ? "bad" : ""; i.title = r.id + ": " + (r.summary || r.status || ""); strip.append(i); }
     body.append(lab, strip);
@@ -633,7 +633,7 @@ function renderHealth(h){
     if (!d.sheetUrl || !/^https:\/\/docs\.google\.com\//.test(d.sheetUrl)) return;
     const line = $("ingestLine"); const a = document.createElement("a");
     a.href = d.sheetUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open the Google Sheet";
-    line.after(Object.assign(document.createElement("p"), { className: "ingest" })); line.nextSibling.append(a, " · status and notes sync daily; the watchlist covers " + (d.watch || []).length + " boards and organisations.");
+    line.after(Object.assign(document.createElement("p"), { className: "ingest" })); line.nextSibling.append(a, " · status and notes sync daily; the watchlist covers " + (d.watch || []).length + " boards and organizations.");
   }).catch(() => {});
   state.jobsCol.onSnapshot(snap => {
     clearTimeout(timer);

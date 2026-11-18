@@ -1,6 +1,6 @@
 # Job sources
 
-Job Scout is only as good as its sources. Mix the four kinds below. Store them in the `config` doc.
+Movement Match is only as good as its sources. Mix the four kinds below. Store them in the `config` doc.
 
 ## 1. Email (`config.email`)
 
@@ -14,7 +14,7 @@ The cheapest, richest source. Ask the user what they already receive, and sugges
 
 ## 2. Live boards (`config.liveBoards`)
 
-Many organisations post jobs through an applicant-tracking system with a public JSON feed. These are read completely every day by `scripts/live_boards.py`, so new jobs are caught the day they appear and closed ones are spotted.
+Many organizations post jobs through an applicant-tracking system with a public JSON feed. These are read completely every day by `scripts/live_boards.py`, so new jobs are caught the day they appear and closed ones are spotted.
 
 | type | How to find the slug | Feed |
 |---|---|---|
@@ -24,22 +24,22 @@ Many organisations post jobs through an applicant-tracking system with a public 
 | `rippling` | `ats.rippling.com/<slug>/jobs` | the board page itself |
 | `ultipro` | `recruiting.ultipro.com/<TENANT>/JobBoard/<BOARD-ID>` | set `base` to that URL instead of `slug` |
 
-To find an organisation's board, open its careers page and look at where "Apply" links go, or web search "<org> greenhouse" / "<org> lever". Check a guessed slug by fetching the feed and confirming the organisation's name.
+To find an organization's board, open its careers page and look at where "Apply" links go, or web search "<org> greenhouse" / "<org> lever". Check a guessed slug by fetching the feed and confirming the organization's name.
 
 Never rely on a cached web-fetch copy of these boards; read the live feed.
 
-## 3. Organisations and pages (`orgWatch`, `watch`)
+## 3. Organizations and pages (`orgWatch`, `watch`)
 
-- `orgWatch`: organisations without a JSON feed. Store `name`, `category`, `careersUrl`, `status` (`resolved`, `resolved-unverified` if guessed, or `no-jobs-page`) and `lastCheckedAt`. The daily run fetches about 20 per day, oldest first.
-- `watch`: job boards and saved searches (`kind: "board"`), organisations the person would love to work for (`kind: "org"`, which boosts fit), and keyword searches (`kind: "search"`, run as web searches). Add a `note` on how to read each one.
+- `orgWatch`: organizations without a JSON feed. Store `name`, `category`, `careersUrl`, `status` (`resolved`, `resolved-unverified` if guessed, or `no-jobs-page`) and `lastCheckedAt`. The daily run fetches about 20 per day, oldest first.
+- `watch`: job boards and saved searches (`kind: "board"`), organizations the person would love to work for (`kind: "org"`, which boosts fit), and keyword searches (`kind: "search"`, run as web searches). Add a `note` on how to read each one.
 
-Good starting points: the person's favourite 20–50 organisations, peers of the places that have interviewed them, and sector job boards. Agencies and consultancies in their field often hire more, and less competitively, than big-name organisations.
+Good starting points: the person's favorite 20–50 organizations, peers of the places that have interviewed them, and sector job boards. Agencies and consultancies in their field often hire more, and less competitively, than big-name organizations.
 
 ## 4. Bluesky (`config.bluesky`)
 
 Public feeds, read without logging in.
 
-- `handles`: job-board accounts, organisations and people who regularly share jobs in the field.
+- `handles`: job-board accounts, organizations and people who regularly share jobs in the field.
 - `announceAllHandles`: accounts where every post is a job (e.g. a job board's bot). Their posts become candidates directly; other accounts' posts are filtered for hiring words and the links followed.
 
 Find accounts with `https://public.api.bsky.app/xrpc/app.bsky.actor.searchActors?q=<name>`. Remove people who haven't shared a job in 60 days.

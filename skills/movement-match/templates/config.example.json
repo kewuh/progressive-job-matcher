@@ -2,7 +2,7 @@
   "sheetId": "<Google Sheet ID from its URL, between /d/ and /edit>",
   "sheetTab": "Jobs",
   "sheetUrl": "https://docs.google.com/spreadsheets/d/<SHEET ID>/edit",
-  "sheetColumns": ["Status","Fit","Title","Organisation","Location","Salary","Posted","Closes (deadline)","Still open?","Source","Found","Why it fits","Notes","Link","ID","Contacts"],
+  "sheetColumns": ["Status","Fit","Title","Organization","Location","Salary","Posted","Closes (deadline)","Still open?","Source","Found","Why it fits","Notes","Link","ID","Contacts"],
   "schedule": {"time": "07:40", "timezone": "America/New_York"},
   "email": {
     "jobListSenders": ["jobalerts-noreply@linkedin.com", "jobs@arena.run"],
@@ -31,9 +31,9 @@
     {"name": "Idealist search", "kind": "board", "url": "https://www.idealist.org/en/jobs?q=digital%20campaigns", "note": "If the page comes back empty, use web search for Idealist listings instead.", "region": "US"}
   ],
   "orgWatch": [
-    {"name": "Example organisation", "category": "High odds", "careersUrl": "https://example.org/careers", "status": "resolved", "note": ""}
+    {"name": "Example organization", "category": "High odds", "careersUrl": "https://example.org/careers", "status": "resolved", "note": ""}
   ],
   "freshnessRule": "If a fetched page is more than 3 days old, mark the source stale, also web-search '<org> job opening', and never close a job based on a stale page.",
   "closingRule": "closing is YYYY-MM-DD when a deadline is stated, or text like 'Rolling' / 'Open until filled'; leave it empty only if the posting says nothing.",
-  "orgWatchRule": "Read every liveBoards feed every run. Fetch other careersUrls about 20 per run, oldest lastCheckedAt first, so each is checked at least every few days. Fix any careersUrl that 404s or shows an unrelated organisation."
+  "orgWatchRule": "Read every liveBoards feed every run. Fetch other careersUrls about 20 per run, oldest lastCheckedAt first, so each is checked at least every few days. Fix any careersUrl that 404s or shows an unrelated organization."
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the Job Scout document id for a job: job_id.py <url> <title>.
+"""Print the Movement Match document id for a job: job_id.py <url> <title>.
 
 Same as the dashboard's JavaScript:
   function hash(s){let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))>>>0;return "j"+h.toString(36);}

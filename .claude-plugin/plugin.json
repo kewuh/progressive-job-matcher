@@ -1,7 +1,13 @@
 {
-  "name": "job-scout",
+  "name": "movement-match",
   "version": "0.1.0",
-  "description": "A daily job-search assistant: finds jobs that match your profile, checks they're still open, scores them against your experience, and keeps a dashboard and Google Sheet tracker in sync.",
+  "description": "Matches people in progressive movements to the right roles: finds jobs every day, checks they're still open, scores them against your experience, and keeps a dashboard and Google Sheet tracker in sync.",
   "license": "MIT",
-  "keywords": ["jobs", "job search", "careers", "google sheets", "gmail"]
+  "keywords": [
+    "jobs",
+    "job search",
+    "careers",
+    "google sheets",
+    "gmail"
+  ]
 }

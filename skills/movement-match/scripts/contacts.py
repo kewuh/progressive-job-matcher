@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Job Scout: find jobs at organisations where you know someone.
+"""Movement Match: find jobs at organizations where you know someone.
 
 Reads the Connections.csv file from a LinkedIn data export (or the whole
 export .zip), groups your connections by their current employer, and matches
 those employers against your tracked jobs.
 
 Privacy: connections' email addresses are always dropped. The output stays on
-your machine or in your own private Job Scout database; never commit it,
+your machine or in your own private Movement Match database; never commit it,
 share it or put it in a public place.
 
 Usage:
   python3 contacts.py build   --linkedin Connections.csv|export.zip --out network.json
   python3 contacts.py match   --network network.json --jobs-dir DIR [--out matches.json]
-  python3 contacts.py lookup  --network network.json "Organisation name"
+  python3 contacts.py lookup  --network network.json "Organization name"
 
 network.json  {"builtAt", "source", "connections", "orgs": {key: {"org", "people": [{"name","position","connectedOn","url"}]}}}
 matches.json  {job_id: {"contactsCount": n, "contacts": [{"name","position","url"}] (up to 5), "contactsOrg": "employer as written on LinkedIn"}}
@@ -29,7 +29,7 @@ import sys
 import zipfile
 
 LEGAL = r"\b(inc|incorporated|llc|l\.l\.c|ltd|limited|plc|corp|corporation|co|company|pbc|cic|gmbh|lp|llp)\b\.?"
-# Words too generic to match an organisation on their own.
+# Words too generic to match an organization on their own.
 GENERIC = {"action", "fund", "foundation", "network", "project", "alliance", "campaign", "union", "council",
            "center", "centre", "institute", "group", "coalition", "partners", "media", "digital", "strategies",
            "global", "national", "international", "america", "american", "united", "states", "new", "york",
@@ -48,8 +48,8 @@ def norm(name):
 
 
 def keys_for(name):
-    """All lookup keys for an organisation name: the main name, any acronym in
-    brackets, and the part before a colon/dash ("Org: Programme")."""
+    """All lookup keys for an organization name: the main name, any acronym in
+    brackets, and the part before a colon/dash ("Org: Program")."""
     out = set()
     k = norm(name)
     if k:
@@ -105,7 +105,7 @@ def build(a):
            "connections": n, "orgs": orgs}
     json.dump(out, open(a.out, "w"), ensure_ascii=False, separators=(",", ":"))
     size = os.path.getsize(a.out)
-    print("%d connections at %d organisations -> %s (%d KB)" % (n, len(orgs), a.out, size // 1024))
+    print("%d connections at %d organizations -> %s (%d KB)" % (n, len(orgs), a.out, size // 1024))
     if size > 900_000:
         print("Note: over 900 KB; store it in the database as several parts (see references/linkedin-contacts.md).")
 
@@ -119,7 +119,7 @@ def index(network):
 
 
 def find(network, idx, org_name):
-    """Network org keys that match a job's organisation name."""
+    """Network org keys that match a job's organization name."""
     hits = set()
     for key in keys_for(org_name):
         hits.update(idx.get(key, []))
@@ -155,7 +155,7 @@ def match(a):
                                          "contactsOrg": network["orgs"][ks[0]]["org"]}
     if a.out:
         json.dump(out, open(a.out, "w"), ensure_ascii=False, indent=1)
-    print("%d tracked jobs are at organisations where you know someone" % len(out))
+    print("%d tracked jobs are at organizations where you know someone" % len(out))
     for k, v in sorted(out.items(), key=lambda x: -x[1]["contactsCount"])[:40]:
         print(" ", k, v["contactsOrg"], "-", v["contactsCount"], "contact(s):", "; ".join(p["name"] for p in v["contacts"][:3]))
 

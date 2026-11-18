@@ -7,7 +7,7 @@ LinkedIn shows more jobs to a signed-in member than its email alerts include. Th
 Create it as a scheduled task in the Claude desktop app, about an hour before the daily run, with this prompt (fill in the placeholders and the searches from the user's profile):
 
 ```
-Daily LinkedIn scan for Job Scout (runs on my computer with Claude in Chrome).
+Daily LinkedIn scan for Movement Match (runs on my computer with Claude in Chrome).
 
 RULES (read-only on LinkedIn)
 - Use Claude in Chrome in my existing signed-in LinkedIn session. Never type a password or sign in; if I'm logged out, stop and say so.
@@ -31,7 +31,7 @@ WHAT TO KEEP
 
 WRITE TO THE SHEET
 - First read Jobs!A:O to find the last used row and the Links already there; skip any job whose Link (or same org + title) is already in the sheet.
-- For each new job, append one row (A–O): Status "Suggested"; Fit blank; Title; Organisation; Location; Salary (if shown); Posted (YYYY-MM-DD); Closes blank; Still open? "Not confirmed"; Source "LinkedIn (browser scan)"; Found = today; Why it fits = one short sentence; Notes blank; Link = the linkedin.com/jobs/view/<id> URL (or the post URL); ID BLANK (the daily run fills it in).
+- For each new job, append one row (A–O): Status "Suggested"; Fit blank; Title; Organization; Location; Salary (if shown); Posted (YYYY-MM-DD); Closes blank; Still open? "Not confirmed"; Source "LinkedIn (browser scan)"; Found = today; Why it fits = one short sentence; Notes blank; Link = the linkedin.com/jobs/view/<id> URL (or the post URL); ID BLANK (the daily run fills it in).
 
 FINISH with a 3-line summary: pages read, jobs added, anything that failed or any warning seen.
 ```

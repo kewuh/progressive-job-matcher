@@ -1,4 +1,4 @@
-# Setting up Job Scout
+# Setting up Movement Match
 
 Work through these steps with the user. Ask questions in small batches, propose sensible defaults, and keep moving. Setup usually takes 15–30 minutes.
 
@@ -6,17 +6,17 @@ Work through these steps with the user. Ask questions in small batches, propose 
 
 Ask the user for:
 
-1. **Their CV or LinkedIn summary.** Ask them to paste it or attach the file. If they keep CVs in Google Drive, you may read them (read-only) with their permission.
+1. **Their resume or LinkedIn summary.** Ask them to paste it or attach the file. If they keep resumes in Google Drive, you may read them (read-only) with their permission.
 2. **What they want:** job types and titles, levels (be generous: include one level below and above), sectors and causes, salary floor if any.
 3. **Where:** home city, whether remote is fine, any second cities. Ask if some places should score a bit lower.
 4. **Dealbreakers:** e.g. no corporate marketing, no relocation, no fixed-term.
-5. **Where their odds are best:** past interviews and rejections tell you a lot. If they've applied to jobs before, ask which ones got interviews. Small and mid-sized organisations often respond better than famous institutions.
+5. **Where their odds are best:** past interviews and rejections tell you a lot. If they've applied to jobs before, ask which ones got interviews. Small and mid-sized organizations often respond better than famous institutions.
 6. **Pronouns**, and any personal topics the scan should never read about (e.g. medical, legal, immigration, family).
 
 Write the profile doc (see `templates/profile.example.json`):
 
 - `summary`: 150–300 words, specific, with numbers. This is what every job is scored against.
-- `prefs`: locations, levels, must-haves, dealbreakers, best-odds organisation types, and "BE EXPANSIVE" unless they want a tight list.
+- `prefs`: locations, levels, must-haves, dealbreakers, best-odds organization types, and "BE EXPANSIVE" unless they want a tight list.
 - `locations` (plain text) and `locationFilters` (2–4 dashboard filter options, each a label plus a lowercase regex such as `new york|nyc|brooklyn|remote`).
 - `queries`: 8–15 short search phrases covering their titles, skills and causes.
 
@@ -36,11 +36,11 @@ Then write the profile doc and an initial config doc to `data/users/me` with Art
 
 ## 3. Create the tracker sheet
 
-Ask the user to create a blank Google Sheet (sheets.new), rename the first tab to `Jobs`, and paste you the link. Don't create it yourself: Job Scout only writes to a sheet the user made. Take the ID from the URL (between `/d/` and `/edit`).
+Ask the user to create a blank Google Sheet (sheets.new), rename the first tab to `Jobs`, and paste you the link. Don't create it yourself: Movement Match only writes to a sheet the user made. Take the ID from the URL (between `/d/` and `/edit`).
 
 Write the header row:
 
-`Status, Fit, Title, Organisation, Location, Salary, Posted, Closes (deadline), Still open?, Source, Found, Why it fits, Notes, Link, ID, Contacts`
+`Status, Fit, Title, Organization, Location, Salary, Posted, Closes (deadline), Still open?, Source, Found, Why it fits, Notes, Link, ID, Contacts`
 
 (write it to `Jobs!A1:P1`). Save `sheetId`, `sheetTab` ("Jobs"), `sheetUrl` and `sheetColumns` in config. Tell them they can edit Status, Fit and Notes in the sheet, add their own rows (Title + Link, ID blank), and delete rows they don't care about; the daily run picks those changes up.
 
@@ -49,9 +49,9 @@ Write the header row:
 Go through `references/sources.md` with them:
 
 - **Email:** which job newsletters, alerts and listservs they already get (or should sign up for). Record sender addresses and Google Groups addresses in `config.email`. Suggest a Gmail label (e.g. "Jobs") for anything else they want read.
-- **Live boards:** organisations they'd love to work for. For each, find the careers page; if it's on Greenhouse, Lever, Ashby, Rippling or UltiPro, add it to `liveBoards` (these are read completely every day). Otherwise add it to `orgWatch` with its careers URL.
+- **Live boards:** organizations they'd love to work for. For each, find the careers page; if it's on Greenhouse, Lever, Ashby, Rippling or UltiPro, add it to `liveBoards` (these are read completely every day). Otherwise add it to `orgWatch` with its careers URL.
 - **Watchlist pages:** job boards and searches for their field (`watch[]`).
-- **Bluesky:** job-board and organisation accounts in their field (`bluesky.handles`); accounts that only post jobs go in `announceAllHandles` too.
+- **Bluesky:** job-board and organization accounts in their field (`bluesky.handles`); accounts that only post jobs go in `announceAllHandles` too.
 - **Filters:** set `filters.titleInclude`, `titleExclude` and `locationInclude` (regex fragments) to match their field and places. These only pre-filter live boards; scoring still decides.
 
 Aim for 10–30 live boards and orgs to start; they can add more any time.

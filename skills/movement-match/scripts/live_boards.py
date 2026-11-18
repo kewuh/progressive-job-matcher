@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Job Scout live-board scanner.
+"""Movement Match live-board scanner.
 
 Reads complete, machine-readable job boards (Greenhouse, Lever, Ashby, Rippling,
 UltiPro) and public Bluesky feeds, filters them with the keyword rules in your
@@ -12,9 +12,9 @@ and never tries to get around a site's bot checks.
 Usage:
   python3 live_boards.py --config config.json [--jobs-dir DIR] [--out live.json] [--days 3]
 
-  --config    the Job Scout config (see templates/config.example.json)
+  --config    the Movement Match config (see templates/config.example.json)
   --jobs-dir  a folder of tracked job JSON files (one per job, as saved from
-              the Job Scout database); used to skip known jobs and spot closures
+              the Movement Match database); used to skip known jobs and spot closures
   --out       where to write the full JSON result (default: live.json)
   --days      how far back to read Bluesky posts (default: 3)
 """

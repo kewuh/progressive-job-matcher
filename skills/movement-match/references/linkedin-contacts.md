@@ -1,13 +1,13 @@
 # Contacts: flag jobs where you know someone
 
-A warm introduction is often the best way into a job. This feature reads the user's LinkedIn connections, groups them by current employer, and flags every tracked job at an organisation where they know someone: on the dashboard ("You know 3 people here", with names and LinkedIn links), with a "Where I know someone" filter, and in a "Contacts" column in the sheet.
+A warm introduction is often the best way into a job. This feature reads the user's LinkedIn connections, groups them by current employer, and flags every tracked job at an organization where they know someone: on the dashboard ("You know 3 people here", with names and LinkedIn links), with a "Where I know someone" filter, and in a "Contacts" column in the sheet.
 
 ## 1. Getting the LinkedIn export
 
 Tell the user:
 
 1. On LinkedIn, go to **Me → Settings & Privacy → Data privacy → Download your data** (older versions call it "Get a copy of your data").
-2. Choose the option to pick particular files ("Want something in particular?"), tick **Connections** only, and click **Request archive**. LinkedIn may ask for their password. (Connections alone usually arrives within 10–20 minutes; a full archive can take a day.)
+2. Choose the option to pick particular files ("Want something in particular?"), check **Connections** only, and click **Request archive**. LinkedIn may ask for their password. (Connections alone usually arrives within 10–20 minutes; a full archive can take a day.)
 3. When LinkedIn's email arrives, go back to the same page and click **Download archive**. It's a `.zip` containing `Connections.csv`.
 4. Upload the zip, or just `Connections.csv`, here.
 
@@ -21,13 +21,13 @@ It keeps each contact's name, position, connected-on date and profile link, grou
 
 Store it in the user's private database as `data/users/me/network` (set; `if_version` if it exists): `{builtAt, source, connections, orgs: {key: {org, people: [...]}}}`. If the file is over ~900 KB, split `orgs` across `network-1`, `network-2`, … and put `{parts: n}` in `network`.
 
-Tell the user how many connections and organisations were found, and the top 10 organisations by number of contacts.
+Tell the user how many connections and organizations were found, and the top 10 organizations by number of contacts.
 
 ## 3. Matching
 
 Run `python3 scripts/contacts.py match --network network.json --jobs-dir <jobs folder> --out matches.json`, or match by hand using the same rules:
 
-- Compare organisation names after lowercasing and removing punctuation, a leading "The", legal suffixes (Inc, LLC, Ltd…) and bracketed parts.
+- Compare organization names after lowercasing and removing punctuation, a leading "The", legal suffixes (Inc, LLC, Ltd…) and bracketed parts.
 - Also match a bracketed acronym ("Natural Resources Defense Council (NRDC)" matches "NRDC").
 - A shorter name matches a longer one only on whole words at the start and only if it's distinctive (2+ words or 6+ letters): "Planned Parenthood" matches "Planned Parenthood Federation of America", but "Planned Parenthood of Greater New York" stays separate, and "Action" matches nothing.
 - Ignore generic employers: self-employed, freelance, confidential, stealth.
@@ -46,7 +46,7 @@ The daily run (step 5b in `references/daily-run.md`) matches new jobs against th
 
 Connections are other people's information. Keep it to what's useful:
 
-- Store the network only in the user's own private Job Scout database, never in a repository, a shared file or a public artifact.
+- Store the network only in the user's own private Movement Match database, never in a repository, a shared file or a public artifact.
 - Keep names, positions and profile links; never email addresses.
 - If the user shares their tracker sheet with anyone, point out that the Contacts column shows contacts' names, and offer to leave that column empty.
 - If the user asks to delete their network, delete `network` (and any parts) and clear `contacts`, `contactsCount` and `contactsOrg` from every job.
