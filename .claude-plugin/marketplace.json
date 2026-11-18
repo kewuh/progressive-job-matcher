@@ -1,0 +1,11 @@
+{
+  "name": "job-scout",
+  "owner": {"name": "Job Scout"},
+  "plugins": [
+    {
+      "name": "job-scout",
+      "source": "./",
+      "description": "A daily job-search assistant with a dashboard and Google Sheet tracker."
+    }
+  ]
+}

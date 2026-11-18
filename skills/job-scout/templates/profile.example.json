@@ -1,0 +1,17 @@
+{
+  "headline": "Finds digital campaigning and communications roles at mission-driven organisations, ranked against my experience.",
+  "summary": "Replace this with a plain-English summary of your experience: years of experience, roles held, the organisations you worked for, your strongest skills (with numbers where you can), tools you know, and the causes you care about. Paste from your CV. The more specific this is, the better the scoring.",
+  "prefs": "Locations: <cities, remote?>. Levels: <e.g. coordinator to director>. Must-haves: <e.g. salary floor, mission areas>. Dealbreakers: <e.g. no corporate marketing, no relocation>. Organisations where I have the best odds: <e.g. small digital-first nonprofits>. BE EXPANSIVE: include junior and adjacent roles, scored honestly.",
+  "locations": "New York or remote (US)",
+  "locationFilters": [
+    {"label": "Home area or remote", "match": "new york|nyc|brooklyn|remote"},
+    {"label": "Second city", "match": "london|united kingdom"}
+  ],
+  "queries": [
+    "digital organizer job",
+    "digital campaigns manager nonprofit",
+    "email and SMS manager advocacy",
+    "online fundraising manager nonprofit",
+    "communications manager progressive organization"
+  ]
+}

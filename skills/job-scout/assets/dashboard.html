@@ -1,0 +1,629 @@
+<title>Job Scout</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working pipeline — command bar on top, stage tabs, then a single column of job "cards" ranked by fit. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#15203a; --muted:#5b6478; --line:#dfe3ea;
+  --accent:#2f4bd6; --accent-ink:#ffffff; --mark:#f3b62a;
+  --good:#1f8a5b; --warn:#b7791f; --low:#8a93a6; --chip:#eef1f7;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Instrument Sans", "Helvetica Neue", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1422; --surface:#171d2e; --ink:#e7eaf2; --muted:#9aa3b8; --line:#2a3249;
+  --accent:#7d93ff; --accent-ink:#0f1422; --mark:#f3c14a;
+  --good:#4cc38a; --warn:#e0a84a; --low:#76809a; --chip:#222a3f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1422; --surface:#171d2e; --ink:#e7eaf2; --muted:#9aa3b8; --line:#2a3249;
+  --accent:#7d93ff; --accent-ink:#0f1422; --mark:#f3c14a;
+  --good:#4cc38a; --warn:#e0a84a; --low:#76809a; --chip:#222a3f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font:700 clamp(28px,5vw,40px)/1.05 var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1 mark{background:linear-gradient(transparent 62%,var(--mark) 62%);color:inherit;padding:0 .05em}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.small{padding:4px 10px;font-size:13px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{font:13px/1.4 var(--mono);color:var(--muted);min-height:1.4em}
+.status.err{color:var(--warn)}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);padding-bottom:0}
+.tab{border:0;background:none;padding:8px 12px;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);white-space:nowrap;font-weight:500}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font:12px var(--mono);margin-left:6px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.filters select{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.list{display:flex;flex-direction:column;gap:12px}
+.job{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;grid-template-columns:64px 1fr;gap:4px 16px}
+.fit{grid-row:span 3;display:flex;flex-direction:column;align-items:center;gap:2px}
+.fit b{font:700 26px/1 var(--display)}
+.fit small{font:11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fit.hi b{color:var(--good)} .fit.mid b{color:var(--warn)} .fit.lo b{color:var(--low)}
+.meter{width:44px;height:4px;background:var(--chip);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;background:currentColor}
+.job h3{margin:0;font:600 17px/1.3 var(--body);min-width:0}
+.job h3 a{color:inherit;text-decoration:none} .job h3 a:hover{text-decoration:underline}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);min-width:0}
+.meta .org{color:var(--ink);font-weight:500}
+.why{margin:6px 0 0;font-size:14px;min-width:0}
+.gaps{font-size:13px;color:var(--muted);margin:2px 0 0}
+.pitch{grid-column:2;background:var(--chip);border-radius:8px;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin-top:6px}
+.actions{grid-column:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.actions select{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:13px}
+.notes{grid-column:2;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px;font-size:13px;resize:vertical;min-height:34px}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--muted)}
+details.profile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+details.profile summary{cursor:pointer;font-weight:600}
+details.profile label{display:block;font:12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}
+details.profile textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:8px;font-size:14px;resize:vertical}
+.tag{font:11px var(--mono);background:var(--chip);border-radius:4px;padding:1px 6px;color:var(--muted)}
+.tag.new{background:var(--mark);color:#15203a}
+.tag.open{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.tag.unk{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.tag.shut{background:var(--chip);color:var(--low)}
+.meta .src{font:12px var(--mono);color:var(--accent)}
+.ingest{font:12px/1.4 var(--mono);color:var(--muted);margin:-8px 0 0}
+.newbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:12px 0 0;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--mark);border-radius:8px;background:var(--bg);font-size:14px}
+.newbar[hidden]{display:none}
+.health{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.health summary{cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;flex-wrap:wrap}
+.health summary::-webkit-details-marker{display:none}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;background:var(--low)}
+.dot.ok{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:#d64545}
+.health .hl{font-weight:600}
+.health .hm{font:12px/1.4 var(--mono);color:var(--muted)}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:12px 0}
+.hgrid div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.hgrid b{display:block;font:700 20px/1.1 var(--display)} .hgrid span{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.strip{display:flex;gap:3px;margin:6px 0 12px;flex-wrap:wrap}
+.strip i{width:16px;height:16px;border-radius:3px;background:var(--chip)}
+.strip i.ok{background:var(--good)} .strip i.warn{background:var(--warn)} .strip i.bad{background:#d64545}
+.srcs{width:100%;border-collapse:collapse;font-size:13px}
+.srcs td,.srcs th{text-align:left;padding:4px 6px;border-top:1px solid var(--line);vertical-align:top}
+.srcs th{font:11px var(--mono);color:var(--muted);text-transform:uppercase}
+.srcs .r-ok{color:var(--good)} .srcs .r-stale{color:var(--warn)} .srcs .r-failed,.srcs .r-blocked{color:#d64545}
+.hscroll{overflow-x:auto}
+@media (max-width:520px){.job{grid-template-columns:48px 1fr;gap:4px 12px}.fit b{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><mark>Job Scout</mark></h1>
+    <p class="sub" id="profileLine">Finds jobs that match your profile, checks they are still open, and ranks each one against your experience.</p>
+  </header>
+
+  <div class="bar">
+    <button class="btn primary" id="searchBtn">Find new jobs</button>
+    <button class="btn" id="recheckBtn">Recheck this tab</button>
+    <button class="btn" id="stopBtn" hidden>Stop</button>
+    <span class="status" id="status" role="status"></span>
+  </div>
+
+  <details class="health" id="health">
+    <summary><span class="dot" id="hDot"></span><span class="hl" id="hHead">Checking the daily run…</span><span class="hm" id="hSub"></span></summary>
+    <div id="hBody"><p class="hm">No health report yet.</p></div>
+  </details>
+  <p class="ingest" id="ingestLine"></p>
+  <div class="newbar" id="newBar" hidden></div>
+
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+
+  <div class="filters">
+    <label for="locFilter">Location</label>
+    <select id="locFilter">
+      <option value="all">Anywhere</option>
+      <option value="remote">Remote</option>
+    </select>
+    <label for="minFit">Min fit</label>
+    <select id="minFit">
+      <option value="0">Any</option><option value="50">50+</option><option value="65">65+</option><option value="80">80+</option>
+    </select>
+    <label for="sortBy">Sort</label>
+    <select id="sortBy"><option value="fit">Best fit</option><option value="posted">Newest posted</option><option value="new">Newest found</option></select>
+    <label for="srcFilter">Source</label>
+    <select id="srcFilter"><option value="all">All sources</option></select>
+  </div>
+
+  <section class="list" id="list" aria-live="polite">
+    <div class="empty" id="loading">Loading your saved jobs…</div>
+  </section>
+
+  <details class="profile" id="profileBox">
+    <summary>Your profile &amp; search terms</summary>
+    <label for="profileText">Profile used for scoring (from your CVs)</label>
+    <textarea id="profileText" rows="9"></textarea>
+    <label for="queriesText">Search queries, one per line</label>
+    <textarea id="queriesText" rows="8"></textarea>
+    <label for="prefsText">Must-haves &amp; dealbreakers</label>
+    <textarea id="prefsText" rows="3"></textarea>
+    <p class="bar" style="margin-top:12px"><button class="btn" id="saveProfile">Save profile</button><span class="status" id="profileStatus"></span></p>
+  </details>
+</div>
+
+<script>
+const STAGES = [
+  ["suggested","Suggested"],["shortlist","Shortlist"],["applied","Applied"],
+  ["interview","Interviewing"],["offer","Offer"],["passed","Passed"],["closed","Closed"]];
+const SEARCH_SERVER = "Parallel Search";
+const $ = id => document.getElementById(id);
+const state = { jobs: new Map(), stage: "suggested", profile: null, uid: null, db: null, jobsCol: null };
+
+function safeGet(k, d){ try { return localStorage.getItem(k) ?? d } catch { return d } }
+function safeSet(k, v){ try { localStorage.setItem(k, v) } catch {} }
+const PREV_SEEN = Number(safeGet("lastSeen", "0")) || 0;
+safeSet("lastSeen", String(Date.now()));
+function newCutoff(){ return PREV_SEEN || state.ingestAt || (Date.now() - 864e5); }
+function isNew(j){ return (j.foundAt || 0) > newCutoff(); }
+state.stage = safeGet("stage", "suggested");
+const LOC_SAVED = safeGet("loc3", "all");
+$("locFilter").value = "all";
+$("minFit").value = safeGet("minFit", "0");
+$("sortBy").value = safeGet("sort", "fit");
+
+function hash(s){ let h = 5381; for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) >>> 0; return "j" + h.toString(36); }
+function setStatus(msg, err){ const el = $("status"); el.textContent = msg || ""; el.classList.toggle("err", !!err); }
+
+function locMatch(j, f){
+  const l = (j.location || "").toLowerCase();
+  if (f === "all") return true;
+  if (f === "remote") return /remote|anywhere|home/.test(l);
+  const custom = (state.profile?.locationFilters || []).find(x => x.label === f);
+  if (custom){ try { return new RegExp(custom.match, "i").test(l); } catch { return true; } }
+  return true;
+}
+
+function renderTabs(){
+  const counts = {}; for (const j of state.jobs.values()) counts[j.status] = (counts[j.status] || 0) + 1;
+  const tabs = $("tabs"); tabs.textContent = "";
+  for (const [k, label] of STAGES){
+    const b = document.createElement("button");
+    b.className = "tab"; b.setAttribute("role","tab"); b.setAttribute("aria-selected", String(k === state.stage));
+    b.textContent = label;
+    const n = document.createElement("span"); n.className = "n"; n.textContent = counts[k] || 0; b.append(n);
+    b.onclick = () => { state.stage = k; safeSet("stage", k); render(); };
+    tabs.append(b);
+  }
+}
+
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function jobCard(j){
+  const card = el("article","job");
+  const fit = Math.max(0, Math.min(100, Number(j.fit) || 0));
+  const f = el("div", "fit " + (fit >= 75 ? "hi" : fit >= 55 ? "mid" : "lo"));
+  f.append(el("b", null, fit), el("small", null, "fit"));
+  const m = el("div","meter"); const bar = el("i"); bar.style.width = fit + "%"; m.append(bar); f.append(m);
+  card.append(f);
+
+  const h = el("h3"); const a = el("a", null, j.title || "Untitled role");
+  a.href = j.url; a.target = "_blank"; a.rel = "noopener"; h.append(a);
+  if (j.status === "suggested" && isNew(j)) { h.append(" "); h.append(el("span","tag new","new")); }
+  const vb = verifyBadge(j); if (vb){ h.append(" "); h.append(vb); }
+  card.append(h);
+
+  const meta = el("div","meta");
+  meta.append(el("span","org", j.org || "Unknown org"));
+  for (const v of [j.location, j.salary, j.posted ? "Posted " + j.posted : "Posted date not listed", j.closing && "Closes " + j.closing]) if (v) meta.append(el("span", null, v));
+  meta.append(el("span", "src", "via " + srcOf(j)));
+  card.append(meta);
+
+  const body = el("div"); body.style.minWidth = "0";
+  if (j.why) body.append(el("p","why", j.why));
+  if (j.gaps) body.append(el("p","gaps", "Watch out: " + j.gaps));
+  card.append(body); body.style.gridColumn = "2";
+
+  if (j.pitch) card.append(el("div","pitch", j.pitch));
+
+  const act = el("div","actions");
+  const sel = el("select"); sel.id = "st-" + j.id; sel.setAttribute("aria-label","Stage");
+  for (const [k, label] of STAGES){ const o = el("option", null, label); o.value = k; if (k === j.status) o.selected = true; sel.append(o); }
+  sel.onchange = () => saveJob(j.id, { status: sel.value, movedAt: Date.now() });
+  act.append(sel);
+  if (j.status === "suggested"){
+    const keep = el("button","btn small","Shortlist"); keep.onclick = () => saveJob(j.id, { status: "shortlist", movedAt: Date.now() });
+    const pass = el("button","btn small","Pass"); pass.onclick = () => saveJob(j.id, { status: "passed", movedAt: Date.now() });
+    act.append(keep, pass);
+  }
+  const vbtn = el("button","btn small","Check it's still open");
+  vbtn.onclick = () => recheck([j], vbtn);
+  act.append(vbtn);
+  const pb = el("button","btn small", j.pitch ? "Redo pitch angle" : "How to pitch it");
+  pb.onclick = () => makePitch(j, pb);
+  act.append(pb);
+  card.append(act);
+
+  if (j.status !== "suggested"){
+    const n = el("textarea","notes"); n.id = "nt-" + j.id; n.placeholder = "Notes: deadline, contact, which CV version…"; n.value = j.notes || "";
+    n.onchange = () => saveJob(j.id, { notes: n.value, notesAt: Date.now() });
+    card.append(n);
+  }
+  return card;
+}
+
+function renderNewBar(){
+  const bar = $("newBar"); const fresh = [...state.jobs.values()].filter(j => j.status === "suggested" && isNew(j));
+  if (!fresh.length){ bar.hidden = true; return; }
+  bar.hidden = false; bar.textContent = "";
+  const when = new Date(newCutoff()).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+  bar.append(el("strong", null, fresh.length + " new job" + (fresh.length === 1 ? "" : "s")), " added since " + (PREV_SEEN ? "your last visit (" + when + ")" : when) + ".");
+  const b = el("button", "btn small", "Show newest first");
+  b.onclick = () => { state.stage = "suggested"; safeSet("stage", "suggested"); $("sortBy").value = "new"; safeSet("sort", "new"); $("locFilter").value = "all"; $("minFit").value = "0"; render(); $("list").scrollIntoView({ behavior: "smooth" }); };
+  bar.append(b);
+}
+function render(){
+  renderTabs(); renderNewBar();
+  const list = $("list"); list.textContent = "";
+  const loc = $("locFilter").value, minFit = Number($("minFit").value), sort = $("sortBy").value;
+  const srcSel = $("srcFilter"), curSrc = srcSel.value;
+  const srcs = [...new Set([...state.jobs.values()].map(srcOf))].sort();
+  if (srcSel.options.length - 1 !== srcs.length || srcs.some((s, i) => srcSel.options[i + 1].value !== s)){
+    srcSel.length = 1;
+    for (const s of srcs){ const o = el("option", null, s); o.value = s; srcSel.append(o); }
+    srcSel.value = srcs.includes(curSrc) ? curSrc : "all";
+  }
+  const src = srcSel.value;
+  const rows = [...state.jobs.values()]
+    .filter(j => j.status === state.stage && locMatch(j, loc) && (Number(j.fit) || 0) >= minFit && (src === "all" || srcOf(j) === src))
+    .sort((a,b) => sort === "fit" ? (b.fit||0) - (a.fit||0) : sort === "posted" ? String(b.posted||"").localeCompare(String(a.posted||"")) || (b.foundAt||0) - (a.foundAt||0) : (b.foundAt||0) - (a.foundAt||0));
+  if (!rows.length){
+    const msg = state.stage === "suggested"
+      ? "No suggestions waiting. Press “Find new jobs” to search the boards against your profile."
+      : "Nothing in this stage yet. Move jobs here with the stage menu on each card.";
+    list.append(el("div","empty", msg)); return;
+  }
+  for (const j of rows) list.append(jobCard(j));
+}
+function srcOf(j){
+  if (j.source) return String(j.source);
+  try { return new URL(j.url).hostname.replace(/^www\./, ""); } catch { return "web"; }
+}
+$("srcFilter").addEventListener("change", render);
+["locFilter","minFit","sortBy"].forEach(id => $(id).addEventListener("change", e => { safeSet({locFilter:"loc3",minFit:"minFit",sortBy:"sort"}[id], e.target.value); render(); }));
+
+async function saveJob(id, patch){
+  const j = state.jobs.get(id); if (!j || !state.jobsCol) return;
+  Object.assign(j, patch); render();
+  try { await state.jobsCol.doc(id).update(patch); }
+  catch (e) { setStatus("Couldn't save that change: " + (e.message || e.code), true); }
+}
+
+/* ---------- Profile ---------- */
+function fillProfile(p){
+  state.profile = p;
+  $("profileText").value = p.summary || "";
+  $("queriesText").value = (p.queries || []).join("\n");
+  $("prefsText").value = p.prefs || "";
+  if (p.headline) $("profileLine").textContent = p.headline;
+  const sel = $("locFilter"); sel.length = 2;
+  for (const x of (p.locationFilters || [])){ if (!x?.label) continue; const o = el("option", null, x.label); o.value = x.label; sel.append(o); }
+  sel.value = [...sel.options].some(o => o.value === LOC_SAVED) ? LOC_SAVED : ((p.locationFilters || [])[0]?.label || "all");
+  if (state.jobs) render();
+}
+$("saveProfile").onclick = async () => {
+  const p = { ...(state.profile || {}),
+    summary: $("profileText").value.trim(),
+    queries: $("queriesText").value.split("\n").map(s => s.trim()).filter(Boolean),
+    prefs: $("prefsText").value.trim() };
+  try { await state.db.doc(`data/users/${state.uid}/profile`).set(p); state.profile = p; $("profileStatus").textContent = "Saved"; }
+  catch (e) { $("profileStatus").textContent = "Not saved: " + (e.message || e.code); }
+};
+
+/* ---------- Verification ---------- */
+function fmtDay(ms){ try { return new Date(ms).toLocaleDateString(undefined,{day:"numeric",month:"short"}) } catch { return "" } }
+function verifyBadge(j){
+  if (j.verified === "open") return el("span","tag open","Open · checked " + fmtDay(j.checkedAt));
+  if (j.verified === "closed") return el("span","tag shut","Closed");
+  if (j.verified === "unknown") return el("span","tag unk","Couldn't confirm open");
+  return null;
+}
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+async function fetchPages(urls, signal){
+  const mcp = await claude.use("mcp");
+  const pages = new Map();
+  for (const group of chunk([...new Set(urls)], 10)){
+    const r = await mcp.callTool(SEARCH_SERVER, "web_fetch", {
+      urls: group, allow_live_fetch: true,
+      objective: "Is this job posting still open and accepting applications today? Find the date posted, the closing/expiry date, 'job is closed', 'no longer accepting applications', 'application period ended', and the employer's direct apply link."
+    }, { signal, cache: false });
+    const p = r.payload || {};
+    for (const x of (p.results || [])) pages.set(x.url, { fetchedAt: x.acquired_at, text: (x.excerpts || []).join("\n…\n").slice(0, 2500) });
+    for (const e of (p.errors || [])) pages.set(e.url, { error: String(e.http_status_code || e.error_type || "fetch failed") });
+  }
+  return pages;
+}
+
+/* Returns Map(key -> {verdict, closing, applyUrl}) for jobs [{key,title,org,url}] */
+async function verifyJobs(jobs, signal, onProgress){
+  const sample = await claude.use("sample");
+  const out = new Map();
+  let pending = jobs.map(j => ({ ...j, checkUrl: j.url }));
+  for (let round = 0; round < 2 && pending.length; round++){
+    onProgress?.(round === 0 ? `Opening ${pending.length} job pages to confirm they're still open…` : `Following ${pending.length} links through to the employers' own pages…`);
+    const pages = await fetchPages(pending.map(j => j.checkUrl), signal);
+    const items = pending.map(j => ({ key: j.key, title: j.title, org: j.org, url: j.checkUrl, page: pages.get(j.checkUrl) || { error: "not returned" } }));
+    const verdicts = await sample.json(`Today is ${todayISO()}. For each job below, decide from the fetched page whether the posting is still accepting applications.
+Rules:
+- "closed": the page says closed / expired / filled / no longer accepting / application period ended, a closing date before today, a 404/410, or the page no longer lists this job.
+- "open": the page is this specific posting, shows an apply button or a closing date today or later, and nothing says it is closed. A fetch dated more than 14 days ago is not enough on its own; use "unknown".
+- "unknown": anything else (aggregator search pages, ambiguous pages, fetch errors other than 404/410).
+Also give "applyUrl": the employer's own posting or ATS link (greenhouse, lever, ashby, workable, jobvite, workday, rippling, the org's site) if the page shows one, else "".
+"closing": YYYY-MM-DD if stated, else "".
+"posted": the date the job was posted as YYYY-MM-DD (convert "3 days ago" etc. using today's date), else "".
+JOBS: ${JSON.stringify(items)}
+Reply with only a JSON array: [{"key":"...","verdict":"open|closed|unknown","closing":"","posted":"","applyUrl":""}]`, { signal, cache: false });
+    const next = [];
+    for (const v of (Array.isArray(verdicts) ? verdicts : [])){
+      const j = pending.find(x => x.key === v?.key); if (!j) continue;
+      const verdict = ["open","closed","unknown"].includes(v.verdict) ? v.verdict : "unknown";
+      const applyUrl = /^https?:\/\//.test(v.applyUrl || "") ? String(v.applyUrl) : "";
+      out.set(j.key, { verdict, closing: String(v.closing || "").slice(0,10), posted: /^\d{4}-\d{2}-\d{2}$/.test(String(v.posted||"")) ? String(v.posted) : (out.get(j.key)?.posted || ""), applyUrl: applyUrl || out.get(j.key)?.applyUrl || "" });
+      if (verdict === "unknown" && applyUrl && applyUrl !== j.checkUrl) next.push({ ...j, checkUrl: applyUrl });
+    }
+    pending = next;
+  }
+  for (const v of out.values()) if (v.verdict === "open" && v.closing && v.closing < todayISO()) v.verdict = "closed";
+  return out;
+}
+
+async function recheck(list, btn){
+  const mcp = await claude.use("mcp"), sample = await claude.use("sample");
+  if (!mcp || !sample){ setStatus("Checking only works when this page is open in Claude.", true); return; }
+  const old = btn?.textContent; if (btn){ btn.disabled = true; btn.textContent = "Checking…"; }
+  try {
+    const res = await verifyJobs(list.map(j => ({ key: j.id, title: j.title, org: j.org, url: j.url })), undefined, setStatus);
+    let closed = 0, open = 0;
+    for (const j of list){
+      const v = res.get(j.id) || { verdict: "unknown" };
+      const patch = { verified: v.verdict, checkedAt: Date.now() };
+      if (v.closing) patch.closing = v.closing;
+      if (v.posted && !j.posted) patch.posted = v.posted;
+      if (v.applyUrl && v.verdict !== "closed") patch.url = v.applyUrl;
+      if (v.verdict === "closed" && ["suggested","shortlist"].includes(j.status)){ patch.status = "closed"; closed++; }
+      if (v.verdict === "open") open++;
+      await saveJob(j.id, patch);
+    }
+    setStatus(`Checked ${list.length}: ${open} confirmed open, ${closed} closed${list.length - open - closed ? `, ${list.length - open - closed} couldn't be confirmed` : ""}.`);
+  } catch (e) { setStatus((e?.code === "invalid_json" || e?.code === "not_granted") ? sampleMessage(e) : mcpMessage(e), e?.code !== "cancelled"); }
+  finally { if (btn){ btn.disabled = false; btn.textContent = old; } }
+}
+
+/* ---------- Search ---------- */
+let ctl = null;
+$("stopBtn").onclick = () => ctl?.abort();
+
+function mcpMessage(e){
+  switch (e?.code){
+    case "server_not_connected": return "Add the Parallel Search connector in claude.ai Settings → Connectors, then try again.";
+    case "needs_reauth": return "Reconnect Parallel Search in claude.ai Settings → Connectors.";
+    case "not_in_manifest": case "approval_required": return "This page needs your OK to use Parallel Search. Press Find new jobs again and choose Allow.";
+    case "blocked_by_policy": return "Your organization blocks Parallel Search for this page.";
+    case "server_unavailable": return "Parallel Search didn't answer. Try again in a minute.";
+    case "cancelled": return "Stopped.";
+    default: return "Search failed: " + (e?.message || e?.code || "unknown error");
+  }
+}
+function sampleMessage(e){
+  switch (e?.code){
+    case "not_granted": case "sampling_disabled": return "Scoring needs permission to use Claude. Allow it when asked.";
+    case "rate_limited": return "You've hit a usage limit. Try again later.";
+    case "invalid_json": return "Claude's ranking came back malformed. Press Find new jobs again.";
+    case "cancelled": return "Stopped.";
+    default: return "Ranking failed: " + (e?.message || e?.code || "unknown error");
+  }
+}
+
+function chunk(arr, n){ const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; }
+
+$("searchBtn").onclick = async () => {
+  const mcp = await claude.use("mcp"), sample = await claude.use("sample");
+  if (!mcp || !sample){ setStatus("Live search only works when this page is open in Claude.", true); return; }
+  const p = state.profile || {};
+  const queries = (p.queries || []).slice(0, 12);
+  if (!queries.length){ setStatus("Add some search queries in your profile first.", true); $("profileBox").open = true; return; }
+  ctl = new AbortController();
+  $("searchBtn").disabled = true; $("stopBtn").hidden = false;
+  let phase = "search";
+  try {
+    const groups = chunk(queries, 3);
+    let done = 0;
+    setStatus(`Searching job boards (0/${groups.length})…`);
+    const today = new Date().toISOString().slice(0,10);
+    const settled = await Promise.allSettled(groups.map(qs =>
+      mcp.callTool(SEARCH_SERVER, "web_search", {
+        objective: `Job postings published in the last 3 weeks before ${today} that are still accepting applications, matching: ${qs.join("; ")}. Prefer individual job posting pages on employer sites and ATS boards (Greenhouse, Lever, Ashby) over aggregators. Locations: ${p.locations || "anywhere"}.`,
+        search_queries: qs
+      }, { signal: ctl.signal, cache: false }).then(r => { setStatus(`Searching job boards (${++done}/${groups.length})…`); return r; })
+    ));
+    const firstErr = settled.find(s => s.status === "rejected");
+    const results = [];
+    const seen = new Set([...state.jobs.values()].map(j => j.url));
+    for (const s of settled){
+      if (s.status !== "fulfilled") continue;
+      for (const r of (s.value.payload?.results || [])){
+        if (!r?.url || results.some(x => x.url === r.url)) continue;
+        if (r.publish_date && (Date.now() - Date.parse(r.publish_date)) > 45 * 864e5) continue;
+        results.push({ url: r.url, title: r.title, published: r.publish_date, text: (r.excerpts || []).join("\n…\n").slice(0, 2200) });
+      }
+    }
+    if (!results.length){ setStatus(firstErr ? mcpMessage(firstErr.reason) : "No results came back. Try different search terms.", true); return; }
+
+    phase = "rank";
+    setStatus(`Reading ${results.length} pages and scoring against your CV… (this takes about a minute)`);
+    const known = [...state.jobs.values()].map(j => `${j.org} | ${j.title}`).slice(0, 200).join("\n");
+    const prompt = `You are screening job search results for one candidate. Today is ${today}.
+
+CANDIDATE PROFILE:
+${p.summary}
+
+MUST-HAVES / DEALBREAKERS:
+${p.prefs || "(none)"}
+
+ALREADY TRACKED (skip these, same org + title):
+${known || "(none)"}
+
+SEARCH RESULTS (each has url, title, excerpts; some are aggregator pages listing several jobs):
+${JSON.stringify(results)}
+
+TASK: Extract every distinct, currently-open job posting that is plausibly relevant to this candidate. Skip expired roles, roles the must-haves rule out, roles clearly in unrelated fields, and anything already tracked. For aggregator pages, extract individual jobs and use the most specific URL shown for that job (otherwise the page URL).
+For each job, score fit 0-100 for THIS candidate: skills and seniority overlap with the profile, mission alignment with what the profile cares about, and location (${p.locations || "any"}). Be honest; a weak match is fine to include with a low score.
+
+Reply with only a JSON array, best fit first, max 25 items:
+[{"url":"...","title":"...","org":"...","location":"e.g. Remote (US) / London (hybrid)","salary":"as stated or empty","posted":"YYYY-MM-DD or empty","closing":"YYYY-MM-DD or empty","fit":82,"why":"one sentence naming the specific CV experience that matches","gaps":"short phrase on the main gap or risk, or empty"}]`;
+    const jobs = await sample.json(prompt, { signal: ctl.signal, cache: false });
+    if (!Array.isArray(jobs)) throw { code: "invalid_json" };
+    const cands = jobs.filter(r => r && r.url && r.title && /^https?:\/\//.test(String(r.url))).slice(0, 20)
+      .map((r, i) => ({ ...r, key: "c" + i }));
+    phase = "verify";
+    const checks = await verifyJobs(cands.map(c => ({ key: c.key, title: String(c.title), org: String(c.org || ""), url: String(c.url) })), ctl.signal, setStatus);
+    let added = 0, droppedClosed = 0, unconfirmed = 0;
+    const now = Date.now();
+    for (const raw of cands){
+      const v = checks.get(raw.key) || { verdict: "unknown" };
+      if (v.verdict === "closed"){ droppedClosed++; continue; }
+      if (v.verdict === "unknown") unconfirmed++;
+      if (v.applyUrl) raw.url = v.applyUrl;
+      if (v.closing) raw.closing = v.closing;
+      raw.verified = v.verdict;
+      if (!raw || !raw.url || !raw.title) continue;
+      const url = String(raw.url);
+      if (!/^https?:\/\//.test(url)) continue;
+      const id = hash(url + "|" + String(raw.title).toLowerCase());
+      if (state.jobs.has(id)) continue;
+      const doc = {
+        url, title: String(raw.title).slice(0,200), org: String(raw.org || "").slice(0,120),
+        location: String(raw.location || "").slice(0,120), salary: String(raw.salary || "").slice(0,80),
+        posted: String(raw.posted || "").slice(0,20), closing: String(raw.closing || "").slice(0,20),
+        fit: Math.max(0, Math.min(100, Math.round(Number(raw.fit) || 0))),
+        why: String(raw.why || "").slice(0,400), gaps: String(raw.gaps || "").slice(0,200),
+        status: "suggested", foundAt: now, notes: "", verified: raw.verified, checkedAt: now, source: "Find new jobs (web search)" };
+      state.jobs.set(id, { id, ...doc });
+      try { await state.jobsCol.doc(id).set(doc); added++; } catch {}
+    }
+    state.stage = "suggested"; render();
+    setStatus((added ? `Added ${added} new suggestion${added === 1 ? "" : "s"}` : "No new open matches this time") + (droppedClosed ? `; skipped ${droppedClosed} that had already closed` : "") + (unconfirmed ? `; ${unconfirmed} couldn't be confirmed open (marked)` : "") + ".");
+  } catch (e) {
+    setStatus(phase === "search" || (phase === "verify" && !["invalid_json","not_granted","rate_limited","sampling_disabled"].includes(e?.code)) ? mcpMessage(e) : sampleMessage(e), e?.code !== "cancelled");
+  } finally {
+    $("searchBtn").disabled = false; $("stopBtn").hidden = true; ctl = null;
+  }
+};
+
+$("recheckBtn").onclick = () => {
+  const list = [...state.jobs.values()].filter(j => j.status === state.stage).slice(0, 20);
+  if (!list.length){ setStatus("Nothing in this tab to check."); return; }
+  recheck(list, $("recheckBtn"));
+};
+
+async function makePitch(j, btn){
+  const sample = await claude.use("sample");
+  if (!sample){ setStatus("Pitch angles only work when this page is open in Claude.", true); return; }
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "Thinking…";
+  try {
+    const { text } = await sample(`Candidate profile:\n${state.profile?.summary}\n\nJob: ${j.title} at ${j.org} (${j.location}). Fit notes: ${j.why} Gap: ${j.gaps}\nPosting URL: ${j.url}\n\nWrite a pitch angle for this application in plain text: 3 short bullets ("- ") naming the specific achievements from the profile to lead with, then one line on how to address the gap. No preamble, under 110 words.`, { cache: false });
+    await saveJob(j.id, { pitch: text.trim() });
+  } catch (e) { setStatus(sampleMessage(e), e?.code !== "cancelled"); }
+  finally { btn.disabled = false; btn.textContent = old; }
+}
+
+/* ---------- Daily-run health ---------- */
+function renderHealth(h){
+  state.health = h;
+  const dot = $("hDot"), head = $("hHead"), sub = $("hSub"), body = $("hBody");
+  const fmt = t => new Date(t).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+  if (!h || !h.lastRunFinishedAt){ dot.className = "dot"; head.textContent = "No daily-run report yet"; sub.textContent = "The next run will write one."; return; }
+  const ageH = (Date.now() - Number(h.lastRunFinishedAt)) / 36e5;
+  let level = h.status === "failed" ? "bad" : h.status === "partial" ? "warn" : "ok";
+  if (ageH > 50) level = "bad"; else if (ageH > 26 && level === "ok") level = "warn";
+  if (h.status === "running" && h.lastRunStartedAt){
+    const runH = (Date.now() - Number(h.lastRunStartedAt)) / 36e5;
+    if (runH < 3){ dot.className = "dot warn"; head.textContent = "Daily run in progress"; sub.textContent = "Started " + fmt(h.lastRunStartedAt); return; }
+    level = "bad"; h = { ...h, status: "failed", summary: "The run that started " + fmt(h.lastRunStartedAt) + " never finished. " + (h.summary || "") };
+  }
+  dot.className = "dot " + level;
+  const ago = ageH < 1 ? Math.round(ageH * 60) + " min ago" : Math.round(ageH) + " h ago";
+  head.textContent = level === "ok" ? "Daily run working" : ageH > 26 ? "Daily run is late — last finished " + ago : h.status === "failed" ? "Last daily run failed" : "Last daily run partly worked";
+  const c = h.counts || {};
+  sub.textContent = "Last run " + fmt(h.lastRunFinishedAt) + " (" + ago + ") · next ≈ " + (h.nextRunAt ? fmt(h.nextRunAt) : "tomorrow");
+  body.textContent = "";
+  const grid = document.createElement("div"); grid.className = "hgrid";
+  const cell = (v, l) => { const d = document.createElement("div"); const b = document.createElement("b"); b.textContent = v ?? "–"; const s = document.createElement("span"); s.textContent = l; d.append(b, s); grid.append(d); };
+  cell(c.newJobs, "new jobs"); cell(c.closed, "closed"); cell(c.reverified, "re-checked");
+  cell(c.emails, "emails read"); cell((c.sourcesOk ?? "–") + "/" + (c.sourcesTotal ?? "–"), "sources OK");
+  cell(c.sourcesStale, "stale copies"); cell(c.sourcesFailed, "failed"); cell((c.orgsResolved ?? "–") + "/" + (c.orgsTotal ?? "–"), "org pages found");
+  body.append(grid);
+  if (state.runs && state.runs.length){
+    const lab = document.createElement("p"); lab.className = "hm"; lab.textContent = "Last " + state.runs.length + " runs (green = OK, amber = partial, red = failed, grey = missed)";
+    const strip = document.createElement("div"); strip.className = "strip";
+    for (const r of state.runs){ const i = document.createElement("i"); i.className = r.status === "ok" ? "ok" : r.status === "partial" ? "warn" : r.status === "failed" ? "bad" : ""; i.title = r.id + ": " + (r.summary || r.status || ""); strip.append(i); }
+    body.append(lab, strip);
+  }
+  if (h.summary){ const p = document.createElement("p"); p.className = "hm"; p.textContent = h.summary; body.append(p); }
+  if (Array.isArray(h.problems) && h.problems.length){
+    const p = document.createElement("p"); p.className = "hm"; p.textContent = "Problems: " + h.problems.join(" · "); body.append(p);
+  }
+  if (Array.isArray(h.sources) && h.sources.length){
+    const wrap = document.createElement("div"); wrap.className = "hscroll";
+    const t = document.createElement("table"); t.className = "srcs";
+    const hr = t.insertRow(); for (const x of ["Source", "How", "Result", "New", "Note"]){ const th = document.createElement("th"); th.textContent = x; hr.append(th); }
+    const order = { failed: 0, blocked: 1, stale: 2, ok: 3 };
+    for (const s of [...h.sources].sort((a, b) => (order[a.result] ?? 4) - (order[b.result] ?? 4))){
+      const r = t.insertRow();
+      r.insertCell().textContent = s.name || ""; r.insertCell().textContent = s.method || "";
+      const rc = r.insertCell(); rc.textContent = s.result || ""; rc.className = "r-" + (s.result || "");
+      r.insertCell().textContent = s.newJobs ?? ""; r.insertCell().textContent = s.note || "";
+    }
+    wrap.append(t); body.append(wrap);
+  }
+}
+
+/* ---------- Boot ---------- */
+(async () => {
+  const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+  const loading = () => $("loading");
+  if (!db || !user){ if (loading()) loading().textContent = "Open this page in Claude while signed in to see your saved jobs."; return; }
+  const uid = await user.id();
+  if (!uid){ if (loading()) loading().textContent = "Sign in to Claude to see your saved jobs."; return; }
+  state.db = db; state.uid = uid;
+  state.jobsCol = db.collection(`data/users/${uid}/jobs/items`);
+  const timer = setTimeout(() => { if (loading()) loading().textContent = "Still loading your jobs… check your connection."; }, 10000);
+  db.doc(`data/users/${uid}/profile`).get().then(s => { if (s.exists) fillProfile(s.data()); }).catch(() => {});
+  db.doc(`data/users/${uid}/ingest`).get().then(s => {
+    if (!s.exists) return;
+    const d = s.data() || {};
+    state.ingestAt = Number(d.lastRunAt) || 0; if (state.jobs) render();
+    const when = d.lastRunAt ? new Date(d.lastRunAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "";
+    $("ingestLine").textContent = "Email import: last run " + when + (d.lastSummary ? " · " + d.lastSummary : "");
+  }).catch(() => {});
+  db.doc(`data/users/${uid}/health`).onSnapshot(s => renderHealth(s.exists ? (s.data() || {}) : null), () => renderHealth(null));
+  db.collection(`data/users/${uid}/runs/items`).get().then(snap => {
+    state.runs = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.id < b.id ? -1 : 1).slice(-21);
+    if (state.health !== undefined) renderHealth(state.health);
+  }).catch(() => {});
+  db.doc(`data/users/${uid}/config`).get().then(s => {
+    const d = s.exists ? (s.data() || {}) : {};
+    if (!d.sheetUrl || !/^https:\/\/docs\.google\.com\//.test(d.sheetUrl)) return;
+    const line = $("ingestLine"); const a = document.createElement("a");
+    a.href = d.sheetUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open the Google Sheet";
+    line.after(Object.assign(document.createElement("p"), { className: "ingest" })); line.nextSibling.append(a, " · status and notes sync daily; the watchlist covers " + (d.watch || []).length + " boards and organisations.");
+  }).catch(() => {});
+  state.jobsCol.onSnapshot(snap => {
+    clearTimeout(timer);
+    state.jobs = new Map(snap.docs.map(d => [d.id, { id: d.id, ...d.data() }]));
+    const active = document.activeElement;
+    if (active && (active.classList?.contains("notes"))) { renderTabs(); return; }
+    render();
+  }, err => { clearTimeout(timer); setStatus("Couldn't load saved jobs: " + (err.message || err.code), true); });
+})();
+</script>
